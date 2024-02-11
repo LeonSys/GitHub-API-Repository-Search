@@ -17,6 +17,7 @@ class RepositoryListViewController: UIViewController {
     private let searchController = UISearchController()
     private let tableView = UITableView()
     private let viewModel = RepositoryListViewModel()
+    private var pageNumber = 1
     
     var searchKeyWord: String = ""
     
@@ -48,7 +49,7 @@ class RepositoryListViewController: UIViewController {
     }
     
     private func fetchRepositories() {
-        viewModel.getReposCompletion(searchKeyWord: searchKeyWord) { success, message in
+        viewModel.getReposCompletion(searchKeyWord: searchKeyWord, pageNumber: pageNumber) { success, message in
             guard success else {
                 self.presentAlertOnMainThread(title: AlertMessages.errorDuringFetchTitle,
                                               message: message ?? "Unkown error" ,
@@ -104,6 +105,23 @@ extension RepositoryListViewController: UITableViewDelegate, UITableViewDataSour
             RepositoryCellView(repoItem: repoItem)
         })
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == viewModel.searchResultRepositories.count {
+            pageNumber += 1
+            viewModel.getReposCompletion(searchKeyWord: searchKeyWord, pageNumber: pageNumber) { success, message in
+                guard success else {
+                    self.presentAlertOnMainThread(title: AlertMessages.errorDuringFetchTitle,
+                                                  message: message ?? "Unkown error" ,
+                                                  buttonTitle: AlertMessages.alertButtonTitle)
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

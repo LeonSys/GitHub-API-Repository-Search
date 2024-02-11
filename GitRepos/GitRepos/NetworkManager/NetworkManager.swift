@@ -15,9 +15,9 @@ public class NetworkManager {
     
     private init() {}
     
-    func getRepositories(searchingKeyWord: String?, completion: @escaping(Result<Response, NetworkError>) -> Void) {
+    func getRepositories(searchingKeyWord: String?, pageNumber: Int, completion: @escaping(Result<Response, NetworkError>) -> Void) {
         let keyWord = searchingKeyWord ?? "Swift"
-        let endpoint = baseURL + "/search/repositories?q=\(keyWord)"
+        let endpoint = baseURL + "/search/repositories?q=\(keyWord)&page=\(pageNumber)"
         
         guard let url = URL(string: endpoint) else {
             completion(.failure(.badURL))
